@@ -1,119 +1,138 @@
-# Telco Project
+# Telco Project (i2i Systems Internship Task)
 
-## How to Set Up Your Repository
+Bu repo; Oracle (Docker) üzerinde telecom verisini ayağa kaldırıp, CSV import ettikten sonra istenen SQL sorgularını çalıştırarak çıktıları üretmek için hazırlanmıştır.
 
-**WARNING**: This is a template project. Do not fork this repository.
+## Project Structure
 
-Please follow the visual steps below to create and set up the project repository on your own GitHub profile.
+- `docker-compose.yml`: Oracle Free (Oracle XE uyumlu) konteyneri
+- `scripts/TABLE_CREATION_SCRIPTS.sql`: tablo + index + constraint scriptleri
+- `scripts/SOLUTIONS.sql`: tüm soru çözümleri (her soru için 3+ cümle açıklama içerir)
+- `CUSTOMERS.csv`, `TARIFFS.csv`, `MONTHLY_STATS.csv`: verilen dataset
+- `outputs/output-*.csv`: her sorunun sorgu çıktısı (export)
 
-1. Click the **"Use this template"** button at the top right of this page.
+## Run Oracle with Docker
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/547179ce-f2ac-4394-ad63-11e35a7daa74" />
+Oracle’ı başlatın:
 
-<br><br>
+```bash
+docker compose up -d
+```
 
-2. Select **"Create a new repository"** to generate your own public repository for this task.
+Container adı: `i2i-telco-db`  
+Port: `1521`
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a1893fef-731f-4c9a-bf68-79db6a39bea9" />
+Not: İlk açılışta Oracle’ın ayağa kalkması birkaç dakika sürebilir.
 
-<br><br>
+## Connection Info (DBeaver)
 
-3. Name your repository as **"telco-project"** and click the **"Create repository"** button.
+DBeaver’da **Oracle** driver ile aşağıdaki şekilde bağlanabilirsiniz:
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7fe03880-8d77-4fcd-a076-827aab2328e5" />
+- **Host**: `localhost`
+- **Port**: `1521`
+- **Database / Service name**: `FREEPDB1` (bazı kurulumlarda `FREE` olarak da görünebilir)
+- **Username**: `SYSTEM`
+- **Password**: `i2i`
 
-<br><br>
+Bu projede tablolar `FREEPDB1` üzerinde ve `SYSTEM` schema altında oluşturulacak şekilde tasarlanmıştır.
 
-Upload all of your solutions to `github.com/yourusername/telco-project`.
+## Table Creation (Auto Seed)
 
----
+`docker-compose.yml` içindeki volume mount sayesinde `./scripts` dizini konteynerde `/container-entrypoint-initdb.d` altına bağlanır.
+Bu nedenle Oracle ilk initialize olurken `scripts/TABLE_CREATION_SCRIPTS.sql` otomatik çalışır ve tablolar oluşur.
 
-## Overview
+Eğer otomatik çalışmadıysa, DBeaver (veya SQL*Plus) üzerinden `scripts/TABLE_CREATION_SCRIPTS.sql` dosyasını manuel çalıştırabilirsiniz.
 
-In this project, you will take on the role of a developer at **i2i Systems**, where you are tasked with fulfilling various team requests through database operations. 
+## Bonus: Docker Compose & Reproducibility
 
-You will receive `.csv` files containing telecom-related data to use for answering the provided questions. Please organize your work as follows:
-* Save your SQL query solutions in a separate file (e.g., `SOLUTIONS.sql`).
-* Include your database table creation scripts, along with their respective indexes and constraints, in another separate file (e.g., `TABLE_CREATION_SCRIPTS.sql`).
+Bu repo bonus maddelerinin şu kısımlarını karşılar:
 
-You must **create your own repository using this template** and upload your work there. 
-Do **not** attempt to push changes directly to this repository or any of its original branches.
+- **Docker Compose ile tek komutla DB**: `docker-compose.yml` ile Oracle konteyneri ayağa kalkar.
+- **Automated Database Seeding (table creation)**: `./scripts` dizini `/container-entrypoint-initdb.d` altına mount edildiği için konteyner ilk initialize olurken SQL scriptleri otomatik çalışabilir.
 
----
+Önemli notlar:
 
-## Operational Requirements
+- Bu “init script” mekanizması genelde **sadece ilk initialize** sırasında çalışır. Container’ı stop/start yapmak aynı init adımını tekrar tetiklemeyebilir.
+- CSV import işlemi bu repoda **manuel** (DBeaver ile) yapılacak şekilde bırakıldı; istenirse ayrıca otomatik seed kapsamına alınabilir.
 
-1. **Oracle XE Setup**
-  * Create a [Docker](https://www.docker.com/products/docker-desktop/) container running **Oracle XE**.  
-  * Ensure that the database is properly configured and accessible from your local machine.
+### (Önerilen) Reproduce Adımları
 
-2. **DBeaver Installation**
-  * Download and install [DBeaver](https://dbeaver.io/).  
-  * Establish a connection to your local Oracle XE instance using the DBeaver client.
+1. Oracle’ı başlat:
 
-3. **Data Import**
-  * Using the provided `.csv` files containing telecom data, design and **create the necessary tables** in Oracle XE. 
-  * **Import the data** from the `.csv` files into your newly created tables, ensuring the schema accurately reflects the provided dataset.
+```bash
+docker compose up -d
+```
 
-4. **Bonus Tasks (Optional for Extra Points)**
-  * **Docker Compose & Reproducibility:** Provide a `docker-compose.yml` file to spin up the Oracle XE database environment easily. Include clear documentation in your repository (with screenshots) explaining the step-by-step process to reproduce your setup.
-  * **Automated Database Seeding:** Configure your Docker Compose setup to automatically run your database scripts (table creation) upon container initialization.
+2. Oracle’ın ayağa kalkmasını bekle (ilk açılış birkaç dakika sürebilir).
+3. DBeaver’dan bağlan:
+   - Host `localhost`, Port `1521`, Service `FREEPDB1`, User `SYSTEM`, Password `i2i`
+4. Tabloların oluştuğunu kontrol et (ör. `CUSTOMERS`, `TARIFFS`, `MONTHLY_STATS` listelenmeli).
+5. CSV import et.
+6. `scripts/SOLUTIONS.sql` çalıştır, sonuçları `outputs/` altına export et.
 
----
+### Screenshots
 
-## Functional Requirements
+Bu repoda ekran görüntüleri `images/` altında tutulmuştur.
 
-You must write SQL queries to address the scenarios listed below. For each query, include comments explaining your approach in **at least three sentences**. Submissions with missing answers or explanations shorter than the required length will **not be evaluated** and will receive **0 points**.
+**1) Docker Compose ile Oracle’ı ayağa kaldırma:**
 
----
+![docker-compose up -d](/images/01-docker-compose-up.png)
 
-### 1. Tariff-Based Customer Queries
+**2) DBeaver bağlantı testi (Oracle):**
 
-**1.1** List the customers who are subscribed to the 'Kobiye Destek' tariff.  
-**1.2** Find the newest customer who subscribed to this tariff.
+![dbeaver connection test](/images/02-dbeaver-connection-test.png)
 
----
+**3) Tabloların oluştuğunu doğrulama:**
 
-### 2. Tariff Distribution
+![tables created](/images/03-tables-created.png)
 
-**2.1** Find the distribution of tariffs among the customers.
+**4) `SOLUTIONS.sql` çalıştırma ve sonuç görüntüleme:**
 
----
+![run solutions](/images/04-run-solutions.png)
 
-### 3. Customer Signup Analysis
+**5) CSV import (örnek: TARIFFS.csv):**
 
-**3.1** Identify the earliest customers to sign up.  
-*(Hint: The earliest customers might not necessarily have the lowest IDs.)*
+![csv import confirm](/images/05-csv-import.png)
 
-**3.2** Find the distribution of these earliest customers across different cities, including the total count for each city.
+**6) Query sonucu export (CSV):**
 
----
+![export to csv](/images/06-export-csv.png)
 
-### 4. Missing Monthly Records
+## CSV Import (DBeaver)
 
-**4.1** Every customer has a monthly fee, and the dataset contains this month's usage values. However, an insertion error occurred, and some customers' monthly records are missing. Identify the IDs of these missing customers.
+CSV import için DBeaver’da:
 
-**4.2** Find the distribution of these missing customers across different cities.
+- `CUSTOMERS.csv` → `CUSTOMERS`
+- `TARIFFS.csv` → `TARIFFS`
+- `MONTHLY_STATS.csv` → `MONTHLY_STATS`
 
----
+İpucu: DBeaver “Import Data” akışında **Header** seçeneğinin açık olduğundan ve tarih alanlarının doğru parse edildiğinden emin olun.
 
-### 5. Usage Analysis
+## Run Queries (Solutions)
 
-**5.1** Find the customers who have used at least 75% of their data limit.  
-**5.2** Identify the customers who have completely exhausted all of their package limits (data, minutes, and SMS).
+Tüm çözümler `scripts/SOLUTIONS.sql` içindedir. DBeaver’da dosyayı açıp çalıştırarak her soru için sonuç setlerini alabilirsiniz.
 
----
+## Outputs Mapping
 
-### 6. Payment Analysis
+Bu repodaki export dosyaları aşağıdaki sorulara karşılık gelir:
 
-**6.1** Find the customers who have unpaid fees.  
-**6.2** Find the distribution of all payment statuses across the different tariffs.
+- `outputs/output-1.1.csv` → 1.1
+- `outputs/output-1.2.csv` → 1.2
+- `outputs/output-2.1.csv` → 2.1
+- `outputs/output-3.1.csv` → 3.1
+- `outputs/output-3.2.csv` → 3.2
+- `outputs/output-4.1.csv` → 4.1
+- `outputs/output-4.2.csv` → 4.2
+- `outputs/output-5.1.csv` → 5.1
+- `outputs/output-5.2.csv` → 5.2
+- `outputs/output-6.1.csv` → 6.1
+- `outputs/output-6.2.csv` → 6.2
 
----
+## Notes / Submission Checklist
 
-## Notes
+- `scripts/TABLE_CREATION_SCRIPTS.sql` içinde tablo tanımları + indexler mevcut.
+- `scripts/SOLUTIONS.sql` içinde tüm soruların sorguları ve her biri için 3+ cümle açıklama mevcut.
+- `outputs/` altında her sorunun sorgu çıktısı CSV olarak export edildi.
 
-* You have the creative freedom to design the database schema as you see fit, based on the provided dataset.
-* Pay close attention to applying the appropriate data types and constraints when creating your tables.
-* You may use DBeaver or SQL*Plus to handle the `.csv` data imports into Oracle XE.
-* Thoroughly test each query and document both the SQL statement and its resulting output in your submission.
+## Repo Hygiene
+
+macOS tarafından oluşturulan `.DS_Store` dosyaları proje çalışması için gerekli değil. Bu repoda `.gitignore` ile dışarıda bırakıldı; istersen tamamen silebilirsin.

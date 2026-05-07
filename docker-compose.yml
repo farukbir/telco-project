@@ -1,0 +1,11 @@
+services:
+  oracle-db:
+    image: gvenzl/oracle-free:23-slim
+    container_name: i2i-telco-db
+    shm_size: 2gb
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_PASSWORD=i2i
+    volumes:
+      - ./scripts:/container-entrypoint-initdb.d

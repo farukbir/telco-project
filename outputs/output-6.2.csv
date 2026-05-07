@@ -1,0 +1,13 @@
+"TARIFF_NAME","PAYMENT_STATUS","TOTAL"
+Genç Dinamik,UNPAID,352
+Genç Dinamik,PAID,1792
+Genç Dinamik,LATE,372
+Kurumsal SMS,PAID,1796
+Kurumsal SMS,LATE,368
+Kurumsal SMS,UNPAID,403
+Çalışan GB,PAID,1692
+Çalışan GB,LATE,365
+Çalışan GB,UNPAID,339
+Kobiye Destek,LATE,392
+Kobiye Destek,PAID,1719
+Kobiye Destek,UNPAID,360
