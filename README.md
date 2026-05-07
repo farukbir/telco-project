@@ -44,17 +44,17 @@ Eğer otomatik çalışmadıysa, DBeaver (veya SQL*Plus) üzerinden `scripts/TAB
 
 ## Bonus: Docker Compose & Reproducibility
 
-Bu repo bonus maddelerinin şu kısımlarını karşılar:
+### Docker Compose
 
-- **Docker Compose ile tek komutla DB**: `docker-compose.yml` ile Oracle konteyneri ayağa kalkar.
-- **Automated Database Seeding (table creation)**: `./scripts` dizini `/container-entrypoint-initdb.d` altına mount edildiği için konteyner ilk initialize olurken SQL scriptleri otomatik çalışabilir.
+Oracle veritabanı `docker-compose.yml` ile ayağa kaldırılır.
 
-Önemli notlar:
+### Automated table creation (init scripts)
 
-- Bu “init script” mekanizması genelde **sadece ilk initialize** sırasında çalışır. Container’ı stop/start yapmak aynı init adımını tekrar tetiklemeyebilir.
-- CSV import işlemi bu repoda **manuel** (DBeaver ile) yapılacak şekilde bırakıldı; istenirse ayrıca otomatik seed kapsamına alınabilir.
+`./scripts` dizini konteyner içinde `/container-entrypoint-initdb.d` altına bağlanır. Veritabanı ilk initialize olurken bu dizindeki SQL scriptleri çalıştırılabilir.
 
-### (Önerilen) Reproduce Adımları
+Not: Init script mekanizması genelde ilk initialize sırasında çalışır; stop/start işlemleri tekrar çalıştırmayabilir.
+
+### Reproduce Adımları
 
 1. Oracle’ı başlat:
 
@@ -71,7 +71,7 @@ docker compose up -d
 
 ### Screenshots
 
-Bu repoda ekran görüntüleri `images/` altında tutulmuştur.
+Ekran görüntüleri `images/` altındadır.
 
 **1) Docker Compose ile Oracle’ı ayağa kaldırma:**
 
@@ -126,13 +126,3 @@ Bu repodaki export dosyaları aşağıdaki sorulara karşılık gelir:
 - `outputs/output-5.2.csv` → 5.2
 - `outputs/output-6.1.csv` → 6.1
 - `outputs/output-6.2.csv` → 6.2
-
-## Notes / Submission Checklist
-
-- `scripts/TABLE_CREATION_SCRIPTS.sql` içinde tablo tanımları + indexler mevcut.
-- `scripts/SOLUTIONS.sql` içinde tüm soruların sorguları ve her biri için 3+ cümle açıklama mevcut.
-- `outputs/` altında her sorunun sorgu çıktısı CSV olarak export edildi.
-
-## Repo Hygiene
-
-macOS tarafından oluşturulan `.DS_Store` dosyaları proje çalışması için gerekli değil. Bu repoda `.gitignore` ile dışarıda bırakıldı; istersen tamamen silebilirsin.
